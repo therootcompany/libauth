@@ -1,0 +1,5 @@
+# git.rootprojects.org/root/keypairs v0.6.5
+## explicit; go 1.12
+git.rootprojects.org/root/keypairs
+git.rootprojects.org/root/keypairs/keyfetch
+git.rootprojects.org/root/keypairs/keyfetch/uncached
