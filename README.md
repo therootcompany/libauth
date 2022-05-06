@@ -42,6 +42,7 @@ func main() {
 		jws, ok := ctx.Value(chiauth.JWSKey).(*libauth.JWS)
 		if !ok || !jws.Trusted {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
 		}
 
 		userID := jws.Claims["sub"].(string)
