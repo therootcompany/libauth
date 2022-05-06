@@ -1,4 +1,4 @@
-# libauth
+# [libauth](https://git.rootprojects.org/root/libauth)
 
 LibAuth for Go - A modern authentication framework that feels as light as a library.
 
