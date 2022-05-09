@@ -76,7 +76,7 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 			inspected, err := libauth.VerifyJWT(token, opts.Issuers, r)
 			if nil != err {
 				w.WriteHeader(http.StatusBadRequest)
-				errmsg := "Invalid Token: " + err.Error()
+				errmsg := "Invalid Token: " + err.Error() + "\n"
 				w.Write([]byte(errmsg))
 				return
 			}
