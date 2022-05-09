@@ -1,6 +1,7 @@
 # [libauth](https://git.rootprojects.org/root/libauth)
 
-LibAuth for Go - A modern authentication framework that feels as light as a library.
+LibAuth for Go - A modern authentication framework that feels as light as a
+library.
 
 [![godoc_button]][godoc]
 
@@ -27,7 +28,7 @@ import (
 func main() {
 	r := chi.NewRouter()
 
-	whitelist, err := keyfetch.NewWhitelist([]string{"https://accounts.google.com"})
+	whitelist, err := keyfetch.NewWhitelist([]string{"https://therootcompany.github.io/libauth/"})
 	if nil != err {
 		panic(err)
 	}
@@ -53,11 +54,45 @@ func main() {
 }
 ```
 
+How to create a demo token with [keypairs][https://webinstall.dev/keypairs]:
+
+```bash
+my_key='./examples/privkey.ec.jwk.json'
+my_claims='{
+    "iss": "https://therootcompany.github.io/libauth/",
+    "sub": "1",
+    "email_verified": false,
+    "email": "jo@example.com"
+}'
+
+keypairs sign \
+    --exp 1h \
+    "${my_key}" \
+    "${my_claims}" \
+    > jwt.txt
+    2> jws.json
+```
+
 How to pass an auth token:
 
 ```bash
-curl -X POST http://localhost:3000/api/users/profile \
-    -H 'Authorization: Bearer <xxxx.yyyy.zzzz>' \
-    -H 'Content-Type: application/json' \
-    --raw-data '{ "foo": "bar" }'
+pushd ./examples
+go run ./server.go
 ```
+
+```bash
+my_token="$(cat ./examples/jwt.txt)"
+
+curl -X POST http://localhost:3000/api/users/profile \
+    -H "Authorization: Bearer ${my_token}" \
+    -H 'Content-Type: application/json' \
+    --data-binary '{ "foo": "bar" }'
+```
+
+## Example OIDC Discovery URLs
+
+-   Demo:
+    <https://therootcompany.github.io/libauth/.well-known/openid-configuration>
+-   Auth0: <https://example.auth0.com/.well-known/openid-configuration>
+-   Okta: <https://example.okta.com/.well-known/openid-configuration>
+-   Google: <https://accounts.google.com/.well-known/openid-configuration>

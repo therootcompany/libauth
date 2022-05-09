@@ -1,0 +1,4 @@
+{
+    "issuer": "https://therootcompany.github.io/libauth/",
+    "jwks_uri": "https://therootcompany.github.io/libauth/.well-known/jwks.json"
+}

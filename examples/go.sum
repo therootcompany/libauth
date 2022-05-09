@@ -1,0 +1,6 @@
+git.rootprojects.org/root/keypairs v0.6.5 h1:sdRAQD/O/JBS8+ZxUewXnY+cjQVDNH3TmcS+KtANZqA=
+git.rootprojects.org/root/keypairs v0.6.5/go.mod h1:WGI8PadOp+4LjUuI+wNlSwcJwFtY8L9XuNjuO3213HA=
+git.rootprojects.org/root/libauth v0.1.0 h1:qM73YYBLByoFTJUXH2ZeUhJdLzY35t4jgNoUAyqH2QA=
+git.rootprojects.org/root/libauth v0.1.0/go.mod h1:bbLDWn0w7I1VfOMP2DZU/t/H9Ln0mT61K+ELH4ievVM=
+github.com/go-chi/chi/v5 v5.0.7 h1:rDTPXLDHGATaeHvVlLcR4Qe0zftYethFucbjVQ1PxU8=
+github.com/go-chi/chi/v5 v5.0.7/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=

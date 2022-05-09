@@ -1,0 +1,18 @@
+{
+  "claims": {
+    "email": "jo@example.com",
+    "email_verified": false,
+    "exp": 1967702403,
+    "iss": "https://therootcompany.github.io/libauth/",
+    "sub": "1"
+  },
+  "header": {
+    "alg": "ES256",
+    "kid": "tsb1m6h3xjp1HjXmJY_8pTtHxld5UvWxoPG9b2e_0aY",
+    "typ": "JWT"
+  },
+  "payload": "eyJlbWFpbCI6ImpvQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJleHAiOjE5Njc3MDI0MDMsImlzcyI6Imh0dHBzOi8vdGhlcm9vdGNvbXBhbnkuZ2l0aHViLmlvL2xpYmF1dGgvIiwic3ViIjoiMSJ9",
+  "protected": "eyJhbGciOiJFUzI1NiIsImtpZCI6InRzYjFtNmgzeGpwMUhqWG1KWV84cFR0SHhsZDVVdld4b1BHOWIyZV8wYVkiLCJ0eXAiOiJKV1QifQ",
+  "signature": "-vezm5OL5c4vlFvvj0Z4HAbX2nAAabO_37w5wMtnD2_OuzTDhM_4wRxzEZ5sdUIJ0rM7gGAv7B3CfGSibr0TJA"
+}
+
