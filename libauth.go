@@ -42,7 +42,7 @@ func VerifyJWS(jws *keypairs.JWS, issuers keyfetch.Whitelist, r *http.Request) (
 	iss, issOK := jws.Claims["iss"].(string)
 
 	_, jwkOK := jws.Header["jwk"]
-	if jwkOK {
+	if !jwkOK {
 		if !kidOK || 0 == len(kid) {
 			//errs = append(errs, "must have either header.kid or header.jwk")
 			return nil, fmt.Errorf("Bad Request: missing 'kid' identifier")
@@ -61,7 +61,7 @@ func VerifyJWS(jws *keypairs.JWS, issuers keyfetch.Whitelist, r *http.Request) (
 		var err error
 		pub, err = keyfetch.OIDCJWK(kid, iss)
 		if nil != err {
-			return nil, fmt.Errorf("Bad Request: 'kid' could not be matched to a known public key")
+			return nil, fmt.Errorf("Bad Request: 'kid' could not be matched to a known public key: %w", err)
 		}
 	} else {
 		return nil, fmt.Errorf("Bad Request: self-signed tokens with 'jwk' are not supported")
