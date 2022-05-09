@@ -10,7 +10,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"git.rootprojects.org/root/keypairs/keyfetch"
-	"git.rootprojects.org/root/libauth"
 	"git.rootprojects.org/root/libauth/chiauth"
 )
 
@@ -38,9 +37,8 @@ func main() {
 		r.Use(tokenVerifier)
 
 		r.Post("/api/users/profile", func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			jws, ok := ctx.Value(chiauth.JWSKey).(*libauth.JWS)
-			if !ok || !jws.Trusted {
+			jws := chiauth.GetJWS(r)
+			if nil == jws || !jws.Trusted {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}

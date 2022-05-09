@@ -39,9 +39,8 @@ func main() {
 	r.Use(tokenVerifier)
 
 	r.Post("/api/users/profile", func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		jws, ok := ctx.Value(chiauth.JWSKey).(*libauth.JWS)
-		if !ok || !jws.Trusted {
+		jws := chiauth.GetJWS(r)
+		if nil == jws || !jws.Trusted {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

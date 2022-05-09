@@ -88,3 +88,10 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 		})
 	}
 }
+
+// GetJWS retrieves *libauth.JWS from r.Context()
+func GetJWS(r *http.Request) *libauth.JWS {
+	ctx := r.Context()
+	jws, _ := ctx.Value(JWSKey).(*libauth.JWS)
+	return jws
+}
