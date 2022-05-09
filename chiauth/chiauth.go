@@ -2,7 +2,6 @@ package chiauth
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 
@@ -46,7 +45,6 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 			// just setting a default, other handlers can change this
 
 			token := r.Header.Get("Authorization")
-			log.Printf("%s %s %s\n", r.Method, r.URL.Path, token)
 
 			if "" == token {
 				if opts.Optional {
