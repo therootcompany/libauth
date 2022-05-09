@@ -7,24 +7,39 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-
-	"git.rootprojects.org/root/keypairs/keyfetch"
+	"git.rootprojects.org/root/libauth"
 	"git.rootprojects.org/root/libauth/chiauth"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load(".env")
+
 	r := chi.NewRouter()
 
-	whitelist, err := keyfetch.NewWhitelist([]string{"https://therootcompany.github.io/libauth/"})
+	if 0 == len(os.Getenv("OIDC_ISSUERS")) {
+		os.Setenv("OIDC_ISSUERS", "https://therootcompany.github.io/libauth/")
+	}
+	whitelist, err := libauth.ParseIssuerEnvs("OIDC_ISSUERS", "OIDC_ISSUERS_INTERNAL")
 	if nil != err {
 		panic(err)
 	}
 
 	// Unauthenticated Routes
 	r.Group(func(r chi.Router) {
+		tokenVerifier := chiauth.NewTokenVerifier(chiauth.VerificationParams{
+			Issuers:  whitelist,
+			Optional: true,
+		})
+		r.Use(tokenVerifier)
 		r.Post("/api/hello", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(`{ "message": "Hello, World!" }`))
+			jws := chiauth.GetJWS(r)
+
+			w.Write([]byte(
+				fmt.Sprintf(`{ "message": "Hello, World!", "authenticated": %t }`, jws.Trusted),
+			))
 		})
 	})
 
@@ -32,7 +47,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		tokenVerifier := chiauth.NewTokenVerifier(chiauth.VerificationParams{
 			Issuers:  whitelist,
-			Optional: true,
+			Optional: false,
 		})
 		r.Use(tokenVerifier)
 

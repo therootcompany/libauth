@@ -3,11 +3,15 @@ package libauth
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"git.rootprojects.org/root/keypairs"
 	"git.rootprojects.org/root/keypairs/keyfetch"
 )
+
+const oidcIssuersEnv = "OIDC_ISSUERS"
+const oidcIssuersInternalEnv = "OIDC_ISSUERS_INTERNAL"
 
 // JWS is keypairs.JWS with added debugging information
 type JWS struct {
@@ -17,26 +21,69 @@ type JWS struct {
 	Errors  []error `json:"errors,omitempty"`
 }
 
+// IssuerList is the trusted list of token issuers
+type IssuerList = keyfetch.Whitelist
+
+// ParseIssuerEnvs will parse ENVs (both comma- and space-delimited) to
+// create a trusted IssuerList of public and/or internal issuer URLs.
+//
+// Example:
+//  OIDC_ISSUERS='https://example.com/ https://therootcompany.github.io/libauth/'
+//  OIDC_ISSUERS_INTERNAL='http://localhost:3000/ http://my-service-name:8080/'
+func ParseIssuerEnvs(issuersEnvName, internalEnvName string) (IssuerList, error) {
+	if len(issuersEnvName) > 0 {
+		issuersEnvName = oidcIssuersEnv
+	}
+	pubs := os.Getenv(issuersEnvName)
+	pubURLs := ParseIssuerListString(pubs)
+
+	if len(internalEnvName) > 0 {
+		internalEnvName = oidcIssuersInternalEnv
+	}
+	internals := os.Getenv(internalEnvName)
+	internalURLs := ParseIssuerListString(internals)
+
+	return keyfetch.NewWhitelist(pubURLs, internalURLs)
+}
+
+// ParseIssuerListString will Split comma- and/or space-delimited list into a slice
+//
+// Example:
+//  "https://example.com/, https://therootcompany.github.io/libauth/"
+func ParseIssuerListString(issuerList string) []string {
+	issuers := []string{}
+
+	issuerList = strings.TrimSpace(issuerList)
+	if len(issuerList) > 0 {
+		issuerList = strings.ReplaceAll(issuerList, ",", " ")
+		issuers = strings.Fields(issuerList)
+	}
+
+	return issuers
+}
+
 // VerifyJWT will return a verified InspectableToken if possible, or otherwise as much detail as possible, possibly including an InspectableToken with failed verification.
-func VerifyJWT(jwt string, issuers keyfetch.Whitelist, r *http.Request) (*JWS, error) {
+func VerifyJWT(jwt string, issuers IssuerList, r *http.Request) (*JWS, error) {
 	jws := keypairs.JWTToJWS(jwt)
 	if nil == jws {
 		return nil, fmt.Errorf("Bad Request: malformed Authorization header")
 	}
 
-	if err := jws.DecodeComponents(); nil != err {
-		return &JWS{
-			*jws,
-			false,
-			[]error{err},
-		}, err
+	myJws := &JWS{
+		*jws,
+		false,
+		[]error{},
+	}
+	if err := myJws.DecodeComponents(); nil != err {
+		myJws.Errors = append(myJws.Errors, err)
+		return myJws, err
 	}
 
-	return VerifyJWS(jws, issuers, r)
+	return VerifyJWS(myJws, issuers, r)
 }
 
 // VerifyJWS takes a fully decoded JWS and will return a verified InspectableToken if possible, or otherwise as much detail as possible, possibly including an InspectableToken with failed verification.
-func VerifyJWS(jws *keypairs.JWS, issuers keyfetch.Whitelist, r *http.Request) (*JWS, error) {
+func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 	var pub keypairs.PublicKey
 	kid, kidOK := jws.Header["kid"].(string)
 	iss, issOK := jws.Claims["iss"].(string)
@@ -67,18 +114,16 @@ func VerifyJWS(jws *keypairs.JWS, issuers keyfetch.Whitelist, r *http.Request) (
 		return nil, fmt.Errorf("Bad Request: self-signed tokens with 'jwk' are not supported")
 	}
 
-	errs := keypairs.VerifyClaims(pub, jws)
+	errs := keypairs.VerifyClaims(pub, &jws.JWS)
 	if 0 != len(errs) {
 		strs := []string{}
 		for _, err := range errs {
+			jws.Errors = append(jws.Errors, err)
 			strs = append(strs, err.Error())
 		}
-		return nil, fmt.Errorf("invalid jwt:\n%s", strings.Join(strs, "\n\t"))
+		return jws, fmt.Errorf("invalid jwt:\n%s", strings.Join(strs, "\n\t"))
 	}
 
-	return &JWS{
-		JWS:     *jws,
-		Trusted: true,
-		Errors:  nil,
-	}, nil
+	jws.Trusted = true
+	return jws, nil
 }
