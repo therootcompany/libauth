@@ -28,8 +28,9 @@ type IssuerList = keyfetch.Whitelist
 // create a trusted IssuerList of public and/or internal issuer URLs.
 //
 // Example:
-//  OIDC_ISSUERS='https://example.com/ https://therootcompany.github.io/libauth/'
-//  OIDC_ISSUERS_INTERNAL='http://localhost:3000/ http://my-service-name:8080/'
+//
+//	OIDC_ISSUERS='https://example.com/ https://therootcompany.github.io/libauth/'
+//	OIDC_ISSUERS_INTERNAL='http://localhost:3000/ http://my-service-name:8080/'
 func ParseIssuerEnvs(issuersEnvName, internalEnvName string) (IssuerList, error) {
 	if len(issuersEnvName) > 0 {
 		issuersEnvName = oidcIssuersEnv
@@ -49,7 +50,8 @@ func ParseIssuerEnvs(issuersEnvName, internalEnvName string) (IssuerList, error)
 // ParseIssuerListString will Split comma- and/or space-delimited list into a slice
 //
 // Example:
-//  "https://example.com/, https://therootcompany.github.io/libauth/"
+//
+//	"https://example.com/, https://therootcompany.github.io/libauth/"
 func ParseIssuerListString(issuerList string) []string {
 	issuers := []string{}
 

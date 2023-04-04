@@ -28,17 +28,16 @@ type VerificationParams struct {
 
 // NewTokenVerifier returns a token-verifying middleware
 //
-//   tokenVerifier := chiauth.NewTokenVerifier(chiauth.VerificationParams{
-//		Issuers: keyfetch.Whitelist([]string{"https://accounts.google.com"}),
-//		Optional: false,
-//   })
-//   r.Use(tokenVerifier)
+//	  tokenVerifier := chiauth.NewTokenVerifier(chiauth.VerificationParams{
+//			Issuers: keyfetch.Whitelist([]string{"https://accounts.google.com"}),
+//			Optional: false,
+//	  })
+//	  r.Use(tokenVerifier)
 //
-//   r.Post("/api/users/profile", func(w http.ResponseWriter, r *http.Request) {
-//		ctx := r.Context()
-//		jws, ok := ctx.Value(chiauth.JWSKey).(*libauth.JWS)
-//   })
-//
+//	  r.Post("/api/users/profile", func(w http.ResponseWriter, r *http.Request) {
+//			ctx := r.Context()
+//			jws, ok := ctx.Value(chiauth.JWSKey).(*libauth.JWS)
+//	  })
 func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
