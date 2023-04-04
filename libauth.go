@@ -92,10 +92,10 @@ func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 
 	_, jwkOK := jws.Header["jwk"]
 	if !jwkOK {
-		if !kidOK || 0 == len(kid) {
+		if !kidOK || len(kid) == 0 {
 			//errs = append(errs, "must have either header.kid or header.jwk")
 			return nil, fmt.Errorf("bad request: missing 'kid' identifier")
-		} else if !issOK || 0 == len(iss) {
+		} else if !issOK || len(iss) == 0 {
 			//errs = append(errs, "payload.iss must exist to complement header.kid")
 			return nil, fmt.Errorf("bad request: payload.iss must exist to complement header.kid")
 		} else {
@@ -117,7 +117,7 @@ func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 	}
 
 	errs := keypairs.VerifyClaims(pub, &jws.JWS)
-	if 0 != len(errs) {
+	if len(errs) != 0 {
 		strs := []string{}
 		for _, err := range errs {
 			jws.Errors = append(jws.Errors, err)

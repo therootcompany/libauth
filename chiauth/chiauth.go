@@ -45,7 +45,7 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 
 			token := r.Header.Get("Authorization")
 
-			if "" == token {
+			if token == "" {
 				if opts.Optional {
 					next.ServeHTTP(w, r)
 					return
@@ -60,7 +60,7 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 			}
 
 			parts := strings.Split(token, " ")
-			if 2 != len(parts) {
+			if len(parts) != 2 {
 				http.Error(
 					w,
 					"Bad Format: expected Authorization header to be in the format of 'Bearer <Token>'",
