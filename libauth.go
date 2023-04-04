@@ -68,7 +68,7 @@ func ParseIssuerListString(issuerList string) []string {
 func VerifyJWT(jwt string, issuers IssuerList, r *http.Request) (*JWS, error) {
 	jws := keypairs.JWTToJWS(jwt)
 	if nil == jws {
-		return nil, fmt.Errorf("Bad Request: malformed Authorization header")
+		return nil, fmt.Errorf("bad request: malformed Authorization header")
 	}
 
 	myJws := &JWS{
@@ -94,26 +94,26 @@ func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 	if !jwkOK {
 		if !kidOK || 0 == len(kid) {
 			//errs = append(errs, "must have either header.kid or header.jwk")
-			return nil, fmt.Errorf("Bad Request: missing 'kid' identifier")
+			return nil, fmt.Errorf("bad request: missing 'kid' identifier")
 		} else if !issOK || 0 == len(iss) {
 			//errs = append(errs, "payload.iss must exist to complement header.kid")
-			return nil, fmt.Errorf("Bad Request: payload.iss must exist to complement header.kid")
+			return nil, fmt.Errorf("bad request: payload.iss must exist to complement header.kid")
 		} else {
 			// TODO beware domain fronting, we should set domain statically
 			// See https://pkg.go.dev/git.rootprojects.org/root/keypairs@v0.6.2/keyfetch
 			// (Caddy does protect against Domain-Fronting by default:
 			//     https://github.com/caddyserver/caddy/issues/2500)
 			if !issuers.IsTrustedIssuer(iss, r) {
-				return nil, fmt.Errorf("Bad Request: 'iss' is not a trusted issuer")
+				return nil, fmt.Errorf("bad request: 'iss' is not a trusted issuer")
 			}
 		}
 		var err error
 		pub, err = keyfetch.OIDCJWK(kid, iss)
 		if nil != err {
-			return nil, fmt.Errorf("Bad Request: 'kid' could not be matched to a known public key: %w", err)
+			return nil, fmt.Errorf("bad request: 'kid' could not be matched to a known public key: %w", err)
 		}
 	} else {
-		return nil, fmt.Errorf("Bad Request: self-signed tokens with 'jwk' are not supported")
+		return nil, fmt.Errorf("bad request: self-signed tokens with 'jwk' are not supported")
 	}
 
 	errs := keypairs.VerifyClaims(pub, &jws.JWS)
