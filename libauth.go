@@ -68,7 +68,7 @@ func ParseIssuerListString(issuerList string) []string {
 func VerifyJWT(jwt string, issuers IssuerList, r *http.Request) (*JWS, error) {
 	jws := keypairs.JWTToJWS(jwt)
 	if nil == jws {
-		return nil, fmt.Errorf("bad request: malformed Authorization header")
+		return nil, fmt.Errorf("bad request: bearer token could not be parsed from 'Authorization' header")
 	}
 
 	myJws := &JWS{
@@ -97,14 +97,14 @@ func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 			return nil, fmt.Errorf("bad request: missing 'kid' identifier")
 		} else if !issOK || len(iss) == 0 {
 			//errs = append(errs, "payload.iss must exist to complement header.kid")
-			return nil, fmt.Errorf("bad request: payload.iss must exist to complement header.kid")
+			return nil, fmt.Errorf("bad request: 'payload.iss' must exist to complement 'header.kid'")
 		} else {
 			// TODO beware domain fronting, we should set domain statically
 			// See https://pkg.go.dev/git.rootprojects.org/root/keypairs@v0.6.2/keyfetch
 			// (Caddy does protect against Domain-Fronting by default:
 			//     https://github.com/caddyserver/caddy/issues/2500)
 			if !issuers.IsTrustedIssuer(iss, r) {
-				return nil, fmt.Errorf("bad request: 'iss' is not a trusted issuer")
+				return nil, fmt.Errorf("unauthorized: 'iss' (%s) is not a trusted issuer", iss)
 			}
 		}
 		var err error
@@ -123,7 +123,7 @@ func VerifyJWS(jws *JWS, issuers IssuerList, r *http.Request) (*JWS, error) {
 			jws.Errors = append(jws.Errors, err)
 			strs = append(strs, err.Error())
 		}
-		return jws, fmt.Errorf("invalid jwt:\n%s", strings.Join(strs, "\n\t"))
+		return jws, fmt.Errorf("invalid jwt:\n\t%s", strings.Join(strs, "\n\t"))
 	}
 
 	jws.Trusted = true

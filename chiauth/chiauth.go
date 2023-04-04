@@ -51,34 +51,28 @@ func NewTokenVerifier(opts VerificationParams) func(http.Handler) http.Handler {
 					return
 				}
 
-				http.Error(
-					w,
-					"Bad Format: missing Authorization header and 'access_token' query",
-					http.StatusBadRequest,
-				)
+				errmsg := "bad format: missing 'Authorization' header and 'access_token' query"
+				http.Error(w, errmsg, http.StatusBadRequest)
 				return
 			}
 
 			parts := strings.Split(token, " ")
 			if len(parts) != 2 {
-				http.Error(
-					w,
-					"Bad Format: expected Authorization header to be in the format of 'Bearer <Token>'",
-					http.StatusBadRequest,
-				)
+				errmsg := "bad format: expected 'Authorization' header to be in the format of 'Bearer <Token>'"
+				http.Error(w, errmsg, http.StatusBadRequest)
 				return
 			}
 			token = parts[1]
 
 			inspected, err := libauth.VerifyJWT(token, opts.Issuers, r)
 			if nil != err {
-				w.WriteHeader(http.StatusBadRequest)
-				errmsg := "Invalid Token: " + err.Error() + "\n"
-				w.Write([]byte(errmsg))
+				errmsg := "invalid token: " + err.Error()
+				http.Error(w, errmsg, http.StatusBadRequest)
 				return
 			}
 			if !inspected.Trusted {
-				http.Error(w, "Bad Token Signature", http.StatusBadRequest)
+				errmsg := "invalid token: bad signature"
+				http.Error(w, errmsg, http.StatusBadRequest)
 				return
 			}
 
